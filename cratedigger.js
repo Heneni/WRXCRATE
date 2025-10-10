@@ -1,3 +1,40 @@
-!function e(t,n,o){function i(a,s){if(!n[a]){if(!t[a]){var l="function"==typeof require&&require;if(!s&&l)return l(a,!0);if(r)return r(a,!0);var u=new Error("Cannot find module '"+a+"'");throw u.code="MODULE_NOT_FOUND",u}var c=n[a]={exports:{}};t[a][0].call(c.exports,function(e){var n=t[a][1][e];return i(n||e)},c,c.exports,e,t,n,o)}return n[a].exports}for(var r="function"==typeof require&&require,a=0;a<o.length;a++)i(o[a]);return i}({1:[function(e,t,n){(function(e){var n="undefined"!=typeof window?window:e,o=n.THREE||{};t.exports=o}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:void 0)},{}],2:[function(e,t,n){t.exports=Object.freeze({scene:{recordBaseY:5,recordShownY:25,recordMoveTime:1000,recordFlippedY:110,cameraFocusPosition:{x:190,y:195,z:93},cameraBasePosition:{x:280,y:200,z:180},targetBasePosition:{x:-20,y:10,z:0},infoOpenTime:700,cameraMoveTime:800,grabSensitivity:6,cameraMouseMoveSpeedY:0.07,cameraMouseMoveSpeedZ:0.04},recordsPerCrate:24,blurAmount:0.4,backgroundColor:1118481,sleeveColor:854338,crateTexture:"images/wood.jpg",sleeveMaskTexture:"images/sleeve.png",lightIntensity:1,postprocessing:!1,debug:!1,canvasWidth:null,canvasHeight:null,nbCrates:2,updateCanvasSizeOnWindowResize:!0,closeInfoPanelOnClick:!0,closeInfoPanelOnScroll:!0,elements:{rootContainer:null,canvasContainer:null,loadingContainer:null,infoContainer:null,titleContainer:null,artistContainer:null,coverContainer:null},onInfoPanelOpened:function(){},onInfoPanelClosed:function(){},onLoadingEnd:function(){},extend:function(e){for(var t in e)Object.prototype.hasOwnProperty.call(e,t)&&(this[t]=e[t]);return this}})},{}],3:[function(e,t,n){var o=window.THREE;t.exports=function(e){return new o.Vector3(e.x,e.y,e.z)}},{}],4:[function(e,t,n){var o=window.THREE;t.exports=function(){return new o.Matrix4}},{}],5:[function(e,t,n){var o=window.THREE;t.exports=function(e){return new o.MeshLambertMaterial({color:e})}},{}],6:[function(e,t,n){t.exports=function(e){return new window.TWEEN.Tween(e)}},{}],7:[function(e,t,n){t.exports=function(){return new window.THREE.BoxGeometry(100,1.5,100,1,1,1)}},{}],8:[function(e,t,n){t.exports=function(e){return new window.THREE.MeshFaceMaterial([e])}},{}],9:[function(e,t,n){t.exports=function(e){e.EffectComposer=function(t,n){if(this.renderer=t,void 0===n){var o=window.innerWidth||1,i=window.innerHeight||1,r={minFilter:e.LinearFilter,magFilter:e.LinearFilter,format:e.RGBFormat,stencilBuffer:!1};n=new e.WebGLRenderTarget(o,i,r)}this.renderTarget1=n,this.renderTarget2=n.clone(),this.writeBuffer=this.renderTarget1,this.readBuffer=this.renderTarget2,this.passes=[],void 0===this.copyPass&&(this.copyPass=new e.ShaderPass(e.CopyShader))}}},{}],10:[function(e,t,n){t.exports=function(e){return new window.THREE.PerspectiveCamera(45,e,0.1,2e4)}},{}],11:[function(e,t,n){t.exports=function(){return new window.THREE.Object3D}},{}],12:[function(e,t,n){t.exports=function(e,t,n){e.lookAt(t.position)}},{}],13:[function(e,t,n){t.exports=function(e){return e}},{}],14:[function(e,t,n){t.exports=function(e){return e}},{}],15:[function(e,t,n){var o=window.THREE;t.exports=function(e){return new o.MeshBasicMaterial({map:e})}},{}],16:[function(e,t,n){var o=window.THREE;t.exports=function(e){return new o.TextureLoader().load(e)}},{}],17:[function(e,t,n){var o=e("./constants");var i=function(){return{init:function(e){o.extend(e)},loadRecords:function(e,t,n){n&&n()}}};window.cratedigger=i();},{"./constants":2}]},{},[17]);
+// Wrap everything in an IIFE and assign the actual API to window.cratedigger
+(function() {
+  var cratedigger = {
+    init: function(options) {
+      // Your actual init logic here
+      // For demo purposes:
+      if (options && options.elements) {
+        // Example: Set up containers
+        this.elements = options.elements;
+        if (options.onInfoPanelOpened) this.onInfoPanelOpened = options.onInfoPanelOpened;
+        if (options.onInfoPanelClosed) this.onInfoPanelClosed = options.onInfoPanelClosed;
+      }
+    },
+    loadRecords: function(data, flag, callback) {
+      // Your loadRecords logic here
+      // For demo purposes:
+      this.records = data;
+      if (callback) callback();
+    },
+    selectPrevRecord: function() {
+      // Navigation logic here
+    },
+    selectNextRecord: function() {
+      // Navigation logic here
+    },
+    getSelectedRecord: function() {
+      // Return the currently selected record
+      return this.records && this.records[0] ? { data: this.records[0] } : null;
+    },
+    flipSelectedRecord: function() {
+      // Flip logic here
+    },
+    elements: {},
+    onInfoPanelOpened: function() {},
+    onInfoPanelClosed: function() {},
+    records: []
+  };
 
-window.cratedigger = window.cratedigger;
+  window.cratedigger = cratedigger;
+})();
