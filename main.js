@@ -1,6 +1,3 @@
-// DO NOT use import/export in this file.
-// Use classic script loading.
-
 const bottomBar = document.getElementById('bottom-bar');
 const buttonPrev = document.getElementById('button-prev');
 const buttonShow = document.getElementById('button-show');
@@ -9,29 +6,36 @@ const titleContainer = document.getElementById('cratedigger-record-title');
 const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer = document.getElementById('cratedigger-record-cover');
 
-// Replace this with your actual album data array
+// Example album data. Replace with your full album list.
 const data = [
-  // ... your album objects here, or load from a separate records.js as a global variable
+  {
+    title: "Let it Hiss",
+    artist: "The Barr Brothers",
+    cover: "https://i.scdn.co/image/ab67616d0000b27392d68ffd58ad8ea4cf9be566",
+    year: "2023",
+    hasSleeve: true
+  }
+  // Add more albums as needed
 ];
 
 function bindEvents() {
-  buttonPrev.addEventListener('click', (e) => {
+  buttonPrev.addEventListener('click', function (e) {
     e.preventDefault();
-    cratedigger.selectPrevRecord();
+    window.cratedigger.selectPrevRecord();
   }, false);
 
-  buttonShow.addEventListener('click', (e) => {
+  buttonShow.addEventListener('click', function (e) {
     e.preventDefault();
-    if (cratedigger.getSelectedRecord()) {
-      cratedigger.flipSelectedRecord();
+    if (window.cratedigger.getSelectedRecord()) {
+      window.cratedigger.flipSelectedRecord();
     } else {
-      cratedigger.selectNextRecord();
+      window.cratedigger.selectNextRecord();
     }
   }, false);
 
-  buttonNext.addEventListener('click', (e) => {
+  buttonNext.addEventListener('click', function (e) {
     e.preventDefault();
-    cratedigger.selectNextRecord();
+    window.cratedigger.selectNextRecord();
   }, false);
 }
 
@@ -39,17 +43,15 @@ function fillInfoPanel(record) {
   if (record.data.title) {
     titleContainer.innerHTML = record.data.title;
   }
-
   if (record.data.artist) {
     artistContainer.innerHTML = record.data.artist;
   }
-
   if (record.data.cover) {
     coverContainer.style.backgroundImage = 'url(' + record.data.cover + ')';
   }
 }
 
-cratedigger.init({
+window.cratedigger.init({
   debug: false,
   elements: {
     rootContainer: document.getElementById('cratedigger'),
@@ -57,16 +59,15 @@ cratedigger.init({
     loadingContainer: document.getElementById('cratedigger-loading'),
     infoContainer: document.getElementById('cratedigger-info'),
   },
-  onInfoPanelOpened() {
+  onInfoPanelOpened: function () {
     bottomBar.classList.add('closed');
-    fillInfoPanel(cratedigger.getSelectedRecord());
+    fillInfoPanel(window.cratedigger.getSelectedRecord());
   },
-
-  onInfoPanelClosed() {
+  onInfoPanelClosed: function () {
     bottomBar.classList.remove('closed');
   },
 });
 
-cratedigger.loadRecords(data, true, () => {
+window.cratedigger.loadRecords(data, true, function () {
   bindEvents();
 });
