@@ -5,6 +5,7 @@ const buttonNext = document.getElementById('button-next');
 const titleContainer = document.getElementById('cratedigger-record-title');
 const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer = document.getElementById('cratedigger-record-cover');
+const loadingContainer = document.getElementById('cratedigger-loading');
 
 // Example album data. Replace with your full album list.
 const data = [
@@ -51,12 +52,25 @@ function fillInfoPanel(record) {
   }
 }
 
+function showLoadingStatus(status) {
+  if (loadingContainer) {
+    loadingContainer.innerHTML =
+      `<div class="info-container">
+        <div class="vertical-center">
+          <span class="loading-label">${status}</span>
+        </div>
+      </div>`;
+  }
+}
+
+showLoadingStatus('Loading records...');
+
 window.cratedigger.init({
   debug: false,
   elements: {
     rootContainer: document.getElementById('cratedigger'),
     canvasContainer: document.getElementById('cratedigger-canvas'),
-    loadingContainer: document.getElementById('cratedigger-loading'),
+    loadingContainer: loadingContainer,
     infoContainer: document.getElementById('cratedigger-info'),
   },
   onInfoPanelOpened: function () {
@@ -69,6 +83,7 @@ window.cratedigger.init({
 });
 
 window.cratedigger.loadRecords(data, true, function () {
+  showLoadingStatus('Records loaded: ' + data.length);
   bindEvents();
-  console.log('Loaded record count:', data.length); // Shows record count in console for QA
+  console.log('Loaded record count:', data.length);
 });
