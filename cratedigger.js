@@ -1,35 +1,24 @@
-// Wrap everything in an IIFE and assign the actual API to window.cratedigger
 (function() {
   var cratedigger = {
     init: function(options) {
-      // Your actual init logic here
-      // For demo purposes:
-      if (options && options.elements) {
-        // Example: Set up containers
-        this.elements = options.elements;
-        if (options.onInfoPanelOpened) this.onInfoPanelOpened = options.onInfoPanelOpened;
-        if (options.onInfoPanelClosed) this.onInfoPanelClosed = options.onInfoPanelClosed;
-      }
+      this.elements = options.elements || {};
+      this.onInfoPanelOpened = options.onInfoPanelOpened || function() {};
+      this.onInfoPanelClosed = options.onInfoPanelClosed || function() {};
+      this.records = [];
     },
     loadRecords: function(data, flag, callback) {
-      // Your loadRecords logic here
-      // For demo purposes:
       this.records = data;
-      if (callback) callback();
+      if (typeof callback === 'function') callback();
     },
-    selectPrevRecord: function() {
-      // Navigation logic here
-    },
-    selectNextRecord: function() {
-      // Navigation logic here
-    },
+    selectPrevRecord: function() {},
+    selectNextRecord: function() {},
     getSelectedRecord: function() {
-      // Return the currently selected record
-      return this.records && this.records[0] ? { data: this.records[0] } : null;
+      if (this.records.length > 0) {
+        return { data: this.records[0] };
+      }
+      return null;
     },
-    flipSelectedRecord: function() {
-      // Flip logic here
-    },
+    flipSelectedRecord: function() {},
     elements: {},
     onInfoPanelOpened: function() {},
     onInfoPanelClosed: function() {},
