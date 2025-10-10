@@ -70,4 +70,5 @@ window.cratedigger.init({
 
 window.cratedigger.loadRecords(data, true, function () {
   bindEvents();
+  console.log('Loaded record count:', data.length); // Shows record count in console for QA
 });
