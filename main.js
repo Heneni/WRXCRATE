@@ -1,5 +1,5 @@
-import cratedigger from './cratedigger.js';
-import data from './records.js';
+// DO NOT use import/export in this file.
+// Use classic script loading.
 
 const bottomBar = document.getElementById('bottom-bar');
 const buttonPrev = document.getElementById('button-prev');
@@ -8,6 +8,11 @@ const buttonNext = document.getElementById('button-next');
 const titleContainer = document.getElementById('cratedigger-record-title');
 const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer = document.getElementById('cratedigger-record-cover');
+
+// Replace this with your actual album data array
+const data = [
+  // ... your album objects here, or load from a separate records.js as a global variable
+];
 
 function bindEvents() {
   buttonPrev.addEventListener('click', (e) => {
