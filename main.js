@@ -1,5 +1,5 @@
 import cratedigger from './cratedigger.js';
-import data from './src/index.js';
+import data from './records.js';
 
 const bottomBar = document.getElementById('bottom-bar');
 const buttonPrev = document.getElementById('button-prev');
