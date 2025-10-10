@@ -1,49 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Cratedigger</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="cratedigger.css" />
-    <link rel="stylesheet" href="main.css" />
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
-</head>
-<body>
-    <div id="cratedigger">
-        <div id="cratedigger-canvas"></div>
-        <div id="cratedigger-loading">
-            <div class="info-container">
-                <div class="vertical-center">
-                    <span class="loading-label">Loading records...</span>
-                </div>
-            </div>
-        </div>
-        <div id="cratedigger-info">
-            <div class="info-container">
-                <div class="vertical-center">
-                    <div id="cratedigger-record-artist"></div>
-                    <div id="cratedigger-record-title"></div>
-                    <div id="cratedigger-record-cover"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="bottom-bar" class="noselect">
-        <div id="button-prev" class="bottom-bar-item">
-            PREVIOUS
-        </div>
-        <div id="button-show" class="bottom-bar-item">
-            SHOW
-        </div>
-        <div id="button-next" class="bottom-bar-item">
-            NEXT
-        </div>
-    </div>
+import cratedigger from './cratedigger.js';
+import data from './src/index.js';
 
-    <!-- Javascript -->
-    <script src="bower_components/modernizr/modernizr.js"></script>
-    <script src="bower_components/threejs/build/three.min.js"></script>
-    <script src="bower_components/dat-gui/build/dat.gui.min.js"></script>
-    <script src="main.js"></script>
-</body>
-</html>
+const bottomBar = document.getElementById('bottom-bar');
+const buttonPrev = document.getElementById('button-prev');
+const buttonShow = document.getElementById('button-show');
+const buttonNext = document.getElementById('button-next');
+const titleContainer = document.getElementById('cratedigger-record-title');
+const artistContainer = document.getElementById('cratedigger-record-artist');
+const coverContainer = document.getElementById('cratedigger-record-cover');
+
+function bindEvents() {
+  buttonPrev.addEventListener('click', (e) => {
+    e.preventDefault();
+    cratedigger.selectPrevRecord();
+  }, false);
+
+  buttonShow.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (cratedigger.getSelectedRecord()) {
+      cratedigger.flipSelectedRecord();
+    } else {
+      cratedigger.selectNextRecord();
+    }
+  }, false);
+
+  buttonNext.addEventListener('click', (e) => {
+    e.preventDefault();
+    cratedigger.selectNextRecord();
+  }, false);
+}
+
+function fillInfoPanel(record) {
+  if (record.data.title) {
+    titleContainer.innerHTML = record.data.title;
+  }
+
+  if (record.data.artist) {
+    artistContainer.innerHTML = record.data.artist;
+  }
+
+  if (record.data.cover) {
+    coverContainer.style.backgroundImage = 'url(' + record.data.cover + ')';
+  }
+}
+
+cratedigger.init({
+  debug: false,
+  elements: {
+    rootContainer: document.getElementById('cratedigger'),
+    canvasContainer: document.getElementById('cratedigger-canvas'),
+    loadingContainer: document.getElementById('cratedigger-loading'),
+    infoContainer: document.getElementById('cratedigger-info'),
+  },
+  onInfoPanelOpened() {
+    bottomBar.classList.add('closed');
+    fillInfoPanel(cratedigger.getSelectedRecord());
+  },
+
+  onInfoPanelClosed() {
+    bottomBar.classList.remove('closed');
+  },
+});
+
+cratedigger.loadRecords(data, true, () => {
+  bindEvents();
+});
