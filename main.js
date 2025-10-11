@@ -115,4 +115,7 @@ window.cratedigger.init({
 // Load the records and then wire up the event handlers
 window.cratedigger.loadRecords(data, true, () => {
   bindEvents();
+  // Hide the loading overlay now that records have loaded
+  const loader = document.getElementById('cratedigger-loading');
+  if (loader) loader.style.display = 'none';
 });
