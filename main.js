@@ -1,6 +1,13 @@
-import cratedigger from './scripts/cratedigger';
+// main.js — ES module for GitHub Pages
+// If your cratedigger build is an ES module, this import will work.
+// NOTE: the .js extension is REQUIRED in browsers.
+import cratediggerModule from './scripts/cratedigger.js';
 
-// Spotify-cover dataset (HTTPS-safe). Using a plain JS array (no JSON.parse) avoids trailing-comma issues.
+// Some cratedigger builds export the object as default, others named.
+// Normalize to a single reference either way.
+const cratedigger = cratediggerModule?.default ?? cratediggerModule;
+
+// Spotify-cover dataset (HTTPS-safe). Plain array avoids JSON.parse pitfalls.
 const data = [
   {"title":"Let it Hiss","artist":"The Barr Brothers","cover":"https://i.scdn.co/image/ab67616d0000b27392d68ffd58ad8ea4cf9be566","year":"acid jazz-jazz funk","hasSleeve":true},
   {"title":"Salesmen & Racists","artist":"Ike Reilly","cover":"https://i.scdn.co/image/ab67616d0000b273f63ef14157f7e8e0ed5e8113","year":"acid jazz-jazz funk","hasSleeve":true},
@@ -19,7 +26,7 @@ const titleContainer = document.getElementById('cratedigger-record-title');
 const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer = document.getElementById('cratedigger-record-cover');
 
-// Wire up controls
+// Controls
 function bindEvents() {
   buttonPrev.addEventListener('click', (e) => {
     e.preventDefault();
@@ -41,23 +48,16 @@ function bindEvents() {
   }, false);
 }
 
-// Populate the info panel when it opens
+// Info panel
 function fillInfoPanel(record) {
-  const r = record?.data ?? record; // supports either wrapped {data: {...}} or raw object
+  const r = record?.data ?? record;
   if (!r) return;
-
-  if (r.title) {
-    titleContainer.innerHTML = r.title;
-  }
-  if (r.artist) {
-    artistContainer.innerHTML = r.artist;
-  }
-  if (r.cover) {
-    coverContainer.style.backgroundImage = 'url(' + r.cover + ')';
-  }
+  if (r.title) titleContainer.innerHTML = r.title;
+  if (r.artist) artistContainer.innerHTML = r.artist;
+  if (r.cover) coverContainer.style.backgroundImage = `url(${r.cover})`;
 }
 
-// Initialize the engine and supply records
+// Initialize and supply records
 cratedigger.init({
   debug: false,
   elements: {
@@ -66,7 +66,7 @@ cratedigger.init({
     loadingContainer: document.getElementById('cratedigger-loading'),
     infoContainer: document.getElementById('cratedigger-info'),
   },
-  // Many builds accept records at init; harmless if ignored.
+  // Many builds accept records at init; harmless if ignored
   records: data,
   onInfoPanelOpened() {
     bottomBar.classList.add('closed');
@@ -77,13 +77,10 @@ cratedigger.init({
   },
 });
 
-// Also support engines that use a setter (harmless no-op if not present)
+// Also support engines that use a setter (no-op if absent)
 if (typeof cratedigger.setRecords === 'function') {
   cratedigger.setRecords(data);
 }
 
-// Finally, wire the UI
+// Wire the UI
 bindEvents();
-
-// Optional but handy for confirming you’re on the right bundle/version
-// console.log('Cratedigger entry loaded with records:', data.length);
