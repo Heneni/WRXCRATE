@@ -1,13 +1,13 @@
-* main.js — application logic for the CrateDigger demo
- *
- * This version avoids using ES module imports because the bundled
- * `cratedigger.js` library is not an ES module. Instead we rely on
- * the global `window.cratedigger` object exposed by that script. The
- * record data is stored in a plain JavaScript array to avoid JSON
- * parsing issues (such as trailing commas). The UI controls are
- * wired up after the records are loaded to ensure everything is
- * initialized before user interaction begins.
- */
+/* main.js — application logic for the CrateDigger demo
+/ *
+/ * This version avoids using ES module imports because the bundled
+/ * `cratedigger.js` library is not an ES module. Instead we rely on
+/ * the global `window.cratedigger` object exposed by that script. The
+/ * record data is stored in a plain JavaScript array to avoid JSON
+ /* parsing issues (such as trailing commas). The UI controls are
+/ * wired up after the records are loaded to ensure everything is
+ /* initialized before user interaction begins.
+/ */
 
 // Dataset of records to display. Each entry contains
 // title, artist, cover art URL, and other metadata. Using a plain
