@@ -4,19 +4,14 @@
   <meta charset="utf-8">
   <title>cratedigger.js</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-  <!-- Styles -->
   <link rel="stylesheet" href="cratedigger.css" />
   <link rel="stylesheet" href="main.css" />
-
-  <!-- Use HTTPS to avoid mixed-content blocking -->
+  <!-- HTTPS avoids mixed-content blocking on GitHub Pages -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
 </head>
-
 <body>
   <div id="cratedigger">
     <div id="cratedigger-canvas"></div>
-
     <div id="cratedigger-loading">
       <div class="info-container">
         <div class="vertical-center">
@@ -24,7 +19,6 @@
         </div>
       </div>
     </div>
-
     <div id="cratedigger-info">
       <div class="info-container">
         <div class="vertical-center">
@@ -42,12 +36,12 @@
     <div id="button-next" class="bottom-bar-item">NEXT</div>
   </div>
 
-  <!-- JavaScript dependencies your project already uses -->
+  <!-- Existing vendor scripts (keep as-is if you use them elsewhere) -->
   <script src="bower_components/modernizr/modernizr.js"></script>
   <script src="bower_components/threejs/build/three.min.js"></script>
   <script src="bower_components/dat-gui/build/dat.gui.min.js"></script>
 
-  <!-- Your app entry: built/bundled version of main.js will be loaded here -->
-  <script src="main.js"></script>
+  <!-- IMPORTANT: Treat main.js as an ES module on GitHub Pages -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>
