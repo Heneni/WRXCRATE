@@ -8,8 +8,8 @@ export default {
   cameraMouseMove: true,
   backgroundColor: 0x111111,
   sleeveColor: 0x0d0702,
-  sleeveMaskTexture: 'images/sleeve.png',
-  crateTexture: 'images/wood.jpg',
+  sleeveMaskTexture: 'image/sleeve.png',
+  crateTexture: 'image/wood.jpg',
   closeInfoPanelOnClick: true,
   closeInfoPanelOnScroll: true,
   postprocessing: false,
@@ -57,7 +57,7 @@ export default {
 
   onLoadingEnd: () => {},
 
-  extend: function(options) {
+  extend: function (options) {
     for (var key in options) {
       if (Object.prototype.hasOwnProperty.call(options, key)) {
         this[key] = options[key];
