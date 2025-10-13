@@ -43,10 +43,37 @@
   <script src="bower_components/threejs/build/three.min.js"></script>
   <script src="bower_components/dat-gui/build/dat.gui.min.js"></script>
 
-  <!-- Load the cratedigger library as a classic script; it attaches itself to window.cratedigger -->
   <script src="cratedigger.js"></script>
 
-  <!-- Load the application logic as a classic script -->
-  <script src="main.js"></script>
-</body>
-</html>
+<!-- Make constants.js usable from classic scripts -->
+<script>
+  // Lightweight ES module loader shim for a single default export
+  (function attachConstants(){
+    var s = document.createElement('script');
+    s.type = 'module';
+    s.text = `
+      import cfg from './constants.js';
+      window.CRATE_CFG = cfg;
+    `;
+    document.currentScript.after(s);
+  })();
+</script>
+
+<script>
+  // Wait until constants are attached, then boot your app
+  (function bootWhenReady(){
+    function ready(){ return window.CRATE_CFG && window.cratedigger; }
+    function tick(){
+      if(ready()){
+        // If your main.js exposes a global boot, call it here; otherwise
+        // main.js will read window.CRATE_CFG directly.
+        if (window.bootCrateDigger) window.bootCrateDigger(window.CRATE_CFG);
+        return;
+      }
+      setTimeout(tick, 0);
+    }
+    tick();
+  })();
+</script>
+
+<script src="main.js"></script>
