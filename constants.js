@@ -8,8 +8,9 @@ export default {
   cameraMouseMove: true,
   backgroundColor: 0x111111,
   sleeveColor: 0x0d0702,
-  sleeveMaskTexture: './image/sleeve.png,
-  crateTexture: './image/wood.jpg,
+  sleeveMaskTexture: './image/sleeve.png',
+crateTexture: './image/wood.jpg',
+
   closeInfoPanelOnClick: true,
   closeInfoPanelOnScroll: true,
   postprocessing: false,
