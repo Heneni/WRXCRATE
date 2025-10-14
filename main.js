@@ -1,7 +1,8 @@
-// /main.js — paste this entire file; CSV-only, no fallbacks
+// /main.js — paste this entire file; CSV-only, no fallbacks, no extras
 (function () {
-  const CSV_URL = './data/records.csv';
+  const CSV_URL = './data/records.csv'; // CSV lives in /data/records.csv
 
+  // CSV parser with quoted-field support; requires a header row.
   function parseCSV(text) {
     const src = text.replace(/\r\n/g, '\n').replace(/^\uFEFF/, '');
     const rows = [];
@@ -26,9 +27,10 @@
     const headers = rows[0].map(h => h.trim().toLowerCase());
     const out = [];
     for (let r = 1; r < rows.length; r++) {
-      if (!rows[r] || rows[r].every(v => (v || '').trim() === '')) continue;
+      const line = rows[r];
+      if (!line || line.every(v => (v || '').trim() === '')) continue;
       const rec = {};
-      for (let c = 0; c < headers.length; c++) rec[headers[c]] = (rows[r][c] || '').trim();
+      for (let c = 0; c < headers.length; c++) rec[headers[c]] = (line[c] || '').trim();
       out.push({
         title: rec.title || '',
         artist: rec.artist || '',
@@ -41,6 +43,7 @@
     return out;
   }
 
+  // Elements expected by your runtime
   const $ = (id) => document.getElementById(id);
   const root = $('cratedigger'), canvas = $('cratedigger-canvas'), loading = $('cratedigger-loading'), info = $('cratedigger-info');
   const btnPrev = $('button-prev'), btnShow = $('button-show'), btnNext = $('button-next');
@@ -63,27 +66,36 @@
     });
   }
 
-  async function boot() {
-    if (!window.cratedigger) {
-      console.error('cratedigger runtime not found (cratedigger.js must load before main.js).');
-      return;
-    }
-
-    window.cratedigger.init({
-      debug: true,
-      elements: { rootContainer: root, canvasContainer: canvas, loadingContainer: loading, infoContainer: info },
-      onInfoPanelOpened: () => updateInfoPanel(window.cratedigger.getSelectedRecord()),
-      onInfoPanelClosed: () => {}
-    });
-
-    let records = [];
-    const res = await fetch(CSV_URL, { cache: 'no-store' });
-    if (res.ok) records = parseCSV(await res.text());
-
-    window.cratedigger.loadRecords(records, true, function onReady() {
-      wireButtons(window.cratedigger);
+  // Wait until cratedigger.js has attached its API before calling it.
+  function waitForAPI() {
+    return new Promise((resolve, reject) => {
+      const t0 = Date.now();
+      (function tick(){
+        if (window.cratedigger && typeof window.cratedigger.init === 'function') return resolve(window.cratedigger);
+        if (Date.now() - t0 > 5000) return reject(new Error('cratedigger API not available'));
+        setTimeout(tick, 16);
+      })();
     });
   }
 
-  boot();
+  async function boot() {
+    const api = await waitForAPI();
+
+    api.init({
+      debug: true,
+      elements: { rootContainer: root, canvasContainer: canvas, loadingContainer: loading, infoContainer: info },
+      onInfoPanelOpened: () => updateInfoPanel(api.getSelectedRecord()),
+      onInfoPanelClosed: () => {}
+    });
+
+    const res = await fetch(CSV_URL, { cache: 'no-store' });
+    const text = res.ok ? await res.text() : '';
+    const records = text ? parseCSV(text) : [];
+
+    api.loadRecords(records, true, function onReady() {
+      wireButtons(api);
+    });
+  }
+
+  boot().catch(err => console.error(err));
 })();
