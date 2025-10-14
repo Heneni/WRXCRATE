@@ -1,4 +1,4 @@
-<!-- /index.html — paste this entire file -->
+<!-- /index.html — paste this entire file, exactly -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,10 +37,10 @@
     <div id="button-next" class="bottom-bar-item">NEXT</div>
   </div>
 
-  <!-- Vendor libs via CDN (fixes vendor 404s) -->
-  <script src="https://cdn.jsdelivr.net/gh/Modernizr/Modernizr@v3.12.0/modernizr.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+  <!-- Vendor libs from your repo (no CDNs, no path changes) -->
+  <script src="./vendor/modernizr.custom.js"></script>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/dat.gui.min.js"></script>
 
   <!-- Your runtime and CSV-driven boot -->
   <script src="./cratedigger.js"></script>
