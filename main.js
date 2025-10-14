@@ -1,9 +1,7 @@
-// main.js — minimal CSV-only data loader for CrateDigger
-// No dev fallbacks, no JSON, no other changes required.
+// /main.js — paste this entire file; CSV-only, no fallbacks
 (function () {
-  const CSV_URL = './records.csv';  // CSV at repo root
+  const CSV_URL = './data/records.csv';
 
-  // Tiny CSV parser with quoted-field support; headers required.
   function parseCSV(text) {
     const src = text.replace(/\r\n/g, '\n').replace(/^\uFEFF/, '');
     const rows = [];
@@ -43,7 +41,6 @@
     return out;
   }
 
-  // Cache element handles the runtime already expects
   const $ = (id) => document.getElementById(id);
   const root = $('cratedigger'), canvas = $('cratedigger-canvas'), loading = $('cratedigger-loading'), info = $('cratedigger-info');
   const btnPrev = $('button-prev'), btnShow = $('button-show'), btnNext = $('button-next');
@@ -51,8 +48,8 @@
 
   function updateInfoPanel(rec) {
     if (!rec) return;
-    titleEl.textContent = rec.title || '';
     artistEl.textContent = rec.artist || '';
+    titleEl.textContent = rec.title || '';
     coverEl.style.backgroundImage = rec.cover ? `url(${rec.cover})` : '';
   }
 
@@ -79,14 +76,9 @@
       onInfoPanelClosed: () => {}
     });
 
-    // load CSV (no fallbacks)
     let records = [];
     const res = await fetch(CSV_URL, { cache: 'no-store' });
-    if (!res.ok) {
-      console.error('CSV fetch failed:', res.status, res.statusText);
-    } else {
-      records = parseCSV(await res.text());
-    }
+    if (res.ok) records = parseCSV(await res.text());
 
     window.cratedigger.loadRecords(records, true, function onReady() {
       wireButtons(window.cratedigger);
