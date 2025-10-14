@@ -1,8 +1,9 @@
-// /main.js — complete file; loads records from /data/records.csv (no hardcoded JSON)
+// main.js — minimal CSV-only data loader for CrateDigger
+// No dev fallbacks, no JSON, no other changes required.
 (function () {
-  const CSV_URL = './data/records.csv';
+  const CSV_URL = './records.csv';  // CSV at repo root
 
-  // Minimal CSV parser with quoted-field support
+  // Tiny CSV parser with quoted-field support; headers required.
   function parseCSV(text) {
     const src = text.replace(/\r\n/g, '\n').replace(/^\uFEFF/, '');
     const rows = [];
@@ -22,12 +23,12 @@
       }
     }
     if (cell.length || row.length) { row.push(cell); rows.push(row); }
-
     if (!rows.length) return [];
+
     const headers = rows[0].map(h => h.trim().toLowerCase());
     const out = [];
     for (let r = 1; r < rows.length; r++) {
-      if (rows[r].every(v => (v || '').trim() === '')) continue; // skip blank lines
+      if (!rows[r] || rows[r].every(v => (v || '').trim() === '')) continue;
       const rec = {};
       for (let c = 0; c < headers.length; c++) rec[headers[c]] = (rows[r][c] || '').trim();
       out.push({
@@ -42,11 +43,11 @@
     return out;
   }
 
-  // Grab UI elements the runtime expects
-  const el = (id) => document.getElementById(id);
-  const root = el('cratedigger'), canvas = el('cratedigger-canvas'), loading = el('cratedigger-loading'), info = el('cratedigger-info');
-  const btnPrev = el('button-prev'), btnShow = el('button-show'), btnNext = el('button-next');
-  const titleEl = el('cratedigger-record-title'), artistEl = el('cratedigger-record-artist'), coverEl = el('cratedigger-record-cover');
+  // Cache element handles the runtime already expects
+  const $ = (id) => document.getElementById(id);
+  const root = $('cratedigger'), canvas = $('cratedigger-canvas'), loading = $('cratedigger-loading'), info = $('cratedigger-info');
+  const btnPrev = $('button-prev'), btnShow = $('button-show'), btnNext = $('button-next');
+  const titleEl = $('cratedigger-record-title'), artistEl = $('cratedigger-record-artist'), coverEl = $('cratedigger-record-cover');
 
   function updateInfoPanel(rec) {
     if (!rec) return;
@@ -67,11 +68,10 @@
 
   async function boot() {
     if (!window.cratedigger) {
-      console.error('cratedigger runtime not found. Ensure cratedigger.js is included before main.js.');
+      console.error('cratedigger runtime not found (cratedigger.js must load before main.js).');
       return;
     }
 
-    // Initialize 3D viewer
     window.cratedigger.init({
       debug: true,
       elements: { rootContainer: root, canvasContainer: canvas, loadingContainer: loading, infoContainer: info },
@@ -79,15 +79,13 @@
       onInfoPanelClosed: () => {}
     });
 
-    // Load CSV and feed records to the viewer
+    // load CSV (no fallbacks)
     let records = [];
-    try {
-      const res = await fetch(CSV_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`CSV HTTP ${res.status}`);
+    const res = await fetch(CSV_URL, { cache: 'no-store' });
+    if (!res.ok) {
+      console.error('CSV fetch failed:', res.status, res.statusText);
+    } else {
       records = parseCSV(await res.text());
-    } catch (e) {
-      console.error('CSV load/parse failed:', e);
-      records = [];
     }
 
     window.cratedigger.loadRecords(records, true, function onReady() {
