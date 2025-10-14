@@ -1,5 +1,4 @@
 # /data/records.csv — headers required, add rows below
-title,artist,cover,year,id,hasSleeve
 Let it Hiss,The Barr Brothers,https://i.scdn.co/image/ab67616d0000b27392d68ffd58ad8ea4cf9be566,2014,1,true
 Salesmen & Racists,Ike Reilly,https://i.scdn.co/image/ab67616d0000b273f63ef14157f7e8e0ed5e8113,2001,2,true
 The Horses and the Hounds,James McMurtry,https://i.scdn.co/image/ab67616d0000b27388ef788544886eb4cb162792,2021,3,true
