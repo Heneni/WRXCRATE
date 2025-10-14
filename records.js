@@ -1,23 +1,24 @@
-import THREE from 'three.js';
+import * as THREE from 'three';
 import TWEEN from 'tween.js';
-
 import Constants from './constants';
 import CameraManager from './cameraManager';
 
 export default class Record {
-  constructor(id, crateId, pos) {
+  constructor(id, crateId, pos, coverUrl = null) {
     this.id = id;
     this.crateId = crateId;
     this.pos = pos;
     this.state = 'out';
+    this.coverUrl = coverUrl;
     this.recordXPos = -62 + (135 / Constants.recordsPerCrate) * pos;
-    this.mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(100, 1.5, 100, 1, 1, 1),
-      new THREE.MeshFaceMaterial(new THREE.MeshLambertMaterial({
-        color: Constants.sleeveColor,
-      }))
-    );
-    this.mesh.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(50, 0, 0));
+
+    // Create record mesh
+    const geometry = new THREE.BoxGeometry(100, 1.5, 100, 1, 1, 1);
+    const baseMaterial = new THREE.MeshLambertMaterial({
+      color: Constants.sleeveColor,
+    });
+    this.mesh = new THREE.Mesh(geometry, baseMaterial);
+    this.mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(50, 0, 0));
     this.mesh.position.set(this.recordXPos, Constants.scene.recordBaseY, 0);
     this.mesh.rotation.z = Math.PI / 2;
     this.mesh.recordId = id;
@@ -28,6 +29,11 @@ export default class Record {
 
     this.setUnactive();
     this.pushRecord();
+
+    // Load album cover if provided
+    if (this.coverUrl) {
+      this.applyCoverTexture(this.coverUrl);
+    }
   }
 
   setActive() {
@@ -40,47 +46,96 @@ export default class Record {
     this.mesh.visible = false;
   }
 
+  applyCoverTexture(imageUrl) {
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin('Anonymous');
+    loader.load(
+      imageUrl,
+      (texture) => {
+        // Compute aspect ratio for cropping
+        const img = texture.image;
+        const w = img.width;
+        const h = img.height;
+        const aspect = w / h;
+
+        // Default repeat/offset (no crop)
+        texture.repeat.set(1, 1);
+        texture.offset.set(0, 0);
+
+        if (aspect > 1) {
+          // Landscape: crop left/right
+          const visibleWidth = h / w;
+          texture.repeat.x = visibleWidth;
+          texture.offset.x = (1 - visibleWidth) / 2;
+        } else if (aspect < 1) {
+          // Portrait: crop top/bottom
+          const visibleHeight = w / h;
+          texture.repeat.y = visibleHeight;
+          texture.offset.y = (1 - visibleHeight) / 2;
+        }
+
+        texture.needsUpdate = true;
+
+        // Create a material using the cropped texture for the front face
+        const coverMaterial = new THREE.MeshLambertMaterial({
+          map: texture,
+        });
+
+        // Replace only the front face of the box with the cover image
+        const sleeveMaterials = [
+          baseMaterial,  // right
+          baseMaterial,  // left
+          baseMaterial,  // top
+          baseMaterial,  // bottom
+          coverMaterial, // front
+          baseMaterial   // back
+        ];
+
+        this.mesh.material = sleeveMaterials;
+        this.mesh.material.needsUpdate = true;
+      },
+      undefined,
+      (err) => console.error('Texture load error:', err)
+    );
+  }
+
   showRecord() {
     this.positionTween.stop();
     this.rotationTween.stop();
 
     if (this.state !== 'shown') {
-
       this.state = 'shown';
       this.absolutePosition.setFromMatrixPosition(this.mesh.matrixWorld);
 
       this.positionTween = new TWEEN.Tween(this.mesh.position)
-        .to({
-          y: Constants.scene.recordShownY,
-        }, Constants.scene.recordMoveTime)
-        .easing(TWEEN.Easing.Quartic.Out).start();
+        .to({ y: Constants.scene.recordShownY }, Constants.scene.recordMoveTime)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
 
       this.rotationTween = new TWEEN.Tween(this.mesh.rotation)
-        .to({
-          z: Math.PI / 2,
-        }, Constants.scene.recordMoveTime)
-        .easing(TWEEN.Easing.Quartic.Out).start();
+        .to({ z: Math.PI / 2 }, Constants.scene.recordMoveTime)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
 
       CameraManager.focusRecord(this.recordXPos, this.absolutePosition);
     }
   }
 
   pushRecord() {
-    if (this.state != 'pushed') {
+    if (this.state !== 'pushed') {
       this.state = 'pushed';
       this.positionTween.stop();
       this.rotationTween.stop();
+
       this.positionTween = new TWEEN.Tween(this.mesh.position)
-        .to({
-          y: Constants.scene.recordBaseY,
-        }, Constants.scene.recordMoveTime)
-        .easing(TWEEN.Easing.Quartic.Out).start();
+        .to({ y: Constants.scene.recordBaseY }, Constants.scene.recordMoveTime)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
 
       this.rotationTween = new TWEEN.Tween(this.mesh.rotation)
-        .to({
-          z: Math.PI / 2 + Math.PI / 7,
-        }, Constants.scene.recordMoveTime)
-        .easing(TWEEN.Easing.Quartic.Out).start();
+        .to({ z: Math.PI / 2 + Math.PI / 7 }, Constants.scene.recordMoveTime)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
     }
   }
 
@@ -91,18 +146,16 @@ export default class Record {
       this.rotationTween.stop();
 
       this.positionTween = new TWEEN.Tween(this.mesh.position)
-        .to({
-          y: Constants.scene.recordBaseY,
-        }, Constants.scene.recordMoveTime)
-        .easing(TWEEN.Easing.Quartic.Out).start();
+        .to({ y: Constants.scene.recordBaseY }, Constants.scene.recordMoveTime)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
 
       this.rotationTween = new TWEEN.Tween(this.mesh.rotation)
-        .to({
-          z: Math.PI / 2 - Math.PI / 7,
-        }, Constants.scene.recordMoveTime)
-        .easing(TWEEN.Easing.Quartic.Out).start();
+        .to({ z: Math.PI / 2 - Math.PI / 7 }, Constants.scene.recordMoveTime)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
     }
-  };
+  }
 
   flipRecord(done) {
     this.state = 'flipped';
@@ -110,23 +163,19 @@ export default class Record {
     this.rotationTween.stop();
 
     this.positionTween = new TWEEN.Tween(this.mesh.position)
-      .to({
-        y: Constants.scene.recordFlippedY,
-      }, Constants.scene.infoOpenTime)
-      .easing(TWEEN.Easing.Quartic.Out).start();
+      .to({ y: Constants.scene.recordFlippedY }, Constants.scene.infoOpenTime)
+      .easing(TWEEN.Easing.Quartic.Out)
+      .start();
 
     this.rotationTween = new TWEEN.Tween(this.mesh.rotation)
       .delay(Constants.scene.infoOpenTime / 4)
-      .to({
-        x: 0,
-        y: Math.PI,
-        z: Math.PI / 2,
-      }, Constants.scene.infoOpenTime)
-      .easing(TWEEN.Easing.Quartic.Out).start()
+      .to({ x: 0, y: Math.PI, z: Math.PI / 2 }, Constants.scene.infoOpenTime)
+      .easing(TWEEN.Easing.Quartic.Out)
+      .start()
       .onComplete(done);
 
     CameraManager.zoomInRecord(this.recordXPos, this.absolutePosition);
-  };
+  }
 
   flipBackRecord(done, noCameraTween) {
     if (this.state === 'flipped') {
@@ -135,21 +184,19 @@ export default class Record {
 
       this.positionTween = new TWEEN.Tween(this.mesh.position)
         .delay(Constants.scene.infoOpenTime / 2)
-        .to({
-          y: Constants.scene.recordBaseY,
-        }, Constants.scene.infoOpenTime)
-        .easing(TWEEN.Easing.Quartic.Out).start();
+        .to({ y: Constants.scene.recordBaseY }, Constants.scene.infoOpenTime)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
 
       this.rotationTween = new TWEEN.Tween(this.mesh.rotation)
-        .to({
-          y: 0,
-        }, Constants.scene.infoOpenTime / 2)
-        .easing(TWEEN.Easing.Quartic.Out).start()
+        .to({ y: 0 }, Constants.scene.infoOpenTime / 2)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start()
         .onComplete(done);
 
       if (!noCameraTween) {
         CameraManager.zoomOutRecord(this.recordXPos, this.absolutePosition);
       }
     }
-  };
+  }
 }
