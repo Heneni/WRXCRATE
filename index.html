@@ -1,81 +1,51 @@
+<!-- /index.html  — complete file -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>cratedigger.js</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <link rel="stylesheet" href="cratedigger.css" />
-  <link rel="stylesheet" href="main.css" />
-  <!-- Link the custom favicon instead of relying on the default favicon.ico request -->
-  <link rel="icon" href="favicon_Version7.ico" type="image/x-icon" />
-  <!-- Use HTTPS to avoid mixed‑content errors on GitHub Pages -->
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+  <meta charset="utf-8" />
+  <title>WRXCRATE · CrateDigger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { margin:0; padding:0; height:100%; background:#0c0c0c; color:#eaeaea; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    #cratedigger { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    #cratedigger-canvas { position:absolute; inset:0; }
+    #cratedigger-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:14px; letter-spacing:0.08em; color:#bbb; }
+    #cratedigger-info { position:absolute; right:16px; top:16px; width:280px; max-width:calc(100% - 32px); background:rgba(15,15,15,.85); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:14px; backdrop-filter: blur(3px); }
+    #cratedigger-info h3 { margin:0 0 6px 0; font-size:16px; }
+    #cratedigger-info .artist { opacity:.85; margin:0 0 10px 0; font-size:13px; }
+    #cratedigger-record-cover { width:100%; padding-top:100%; background-size:cover; background-position:center; border-radius:8px; border:1px solid rgba(255,255,255,.06); }
+    #controls { position:absolute; left:0; right:0; bottom:0; padding:14px 12px 16px; display:flex; gap:12px; justify-content:center; background:linear-gradient(180deg, rgba(12,12,12,0) 0%, rgba(12,12,12,.85) 30%, rgba(12,12,12,.95) 100%); }
+    #controls button { appearance:none; border:1px solid rgba(255,255,255,.15); background:#1a1a1a; color:#f2f2f2; padding:10px 14px; border-radius:10px; font-size:14px; cursor:pointer; transition:transform .06s ease, background .12s ease; }
+    #controls button:hover { background:#232323; transform: translateY(-1px); }
+  </style>
 </head>
 <body>
   <div id="cratedigger">
-    <div id="cratedigger-canvas"></div>
-    <div id="cratedigger-loading">
-      <div class="info-container">
-        <div class="vertical-center">
-          <span class="loading-label">Loading records...</span>
-        </div>
-      </div>
-    </div>
-    <div id="cratedigger-info">
-      <div class="info-container">
-        <div class="vertical-center">
-          <div id="cratedigger-record-artist"></div>
-          <div id="cratedigger-record-title"></div>
-          <div id="cratedigger-record-cover"></div>
-        </div>
-      </div>
-    </div>
+    <div id="cratedigger-canvas" aria-label="3D record crate canvas"></div>
+    <div id="cratedigger-loading">Loading crate…</div>
+
+    <aside id="cratedigger-info" aria-live="polite">
+      <h3 id="cratedigger-record-title"></h3>
+      <p class="artist" id="cratedigger-record-artist"></p>
+      <div id="cratedigger-record-cover" role="img" aria-label="Selected record cover"></div>
+    </aside>
+
+    <nav id="controls" aria-label="Crate controls">
+      <button id="button-prev" type="button" aria-label="Previous record">◀︎ Prev</button>
+      <button id="button-show" type="button" aria-label="Flip / Show cover">Flip / Show</button>
+      <button id="button-next" type="button" aria-label="Next record">Next ▶︎</button>
+    </nav>
   </div>
 
-  <div id="bottom-bar" class="noselect">
-    <div id="button-prev" class="bottom-bar-item">PREVIOUS</div>
-    <div id="button-show" class="bottom-bar-item">SHOW</div>
-    <div id="button-next" class="bottom-bar-item">NEXT</div>
-  </div>
+  <!-- Vendor order preserved to match existing project layout -->
+  <script src="./vendor/modernizr.custom.js"></script>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/dat.gui.min.js"></script>
 
-  <!-- Existing vendor scripts -->
-  <script src="bower_components/modernizr/modernizr.js"></script>
-  <script src="bower_components/threejs/build/three.min.js"></script>
-  <script src="bower_components/dat-gui/build/dat.gui.min.js"></script>
+  <!-- Your 3D crate runtime (unchanged) -->
+  <script src="./cratedigger.js"></script>
 
-  <script src="cratedigger.js"></script>
-
-<!-- Make constants.js usable from classic scripts -->
-<script>
-  // Lightweight ES module loader shim for a single default export
-  (function attachConstants(){
-    var s = document.createElement('script');
-    s.type = 'module';
-    s.text = `
-      import cfg from './constants.js';
-      window.CRATE_CFG = cfg;
-    `;
-    document.currentScript.after(s);
-  })();
-</script>
-
-<script>
-  // Wait until constants are attached, then boot your app
-  (function bootWhenReady(){
-    function ready(){ return window.CRATE_CFG && window.cratedigger; }
-    function tick(){
-      if(ready()){
-        // If your main.js exposes a global boot, call it here; otherwise
-        // main.js will read window.CRATE_CFG directly.
-        if (window.bootCrateDigger) window.bootCrateDigger(window.CRATE_CFG);
-        return;
-      }
-      setTimeout(tick, 0);
-    }
-    tick();
-  })();
-</script>
-
-<!-- index.html — bottom of <body>; ensure this exact order -->
-<script src="cratedigger.js"></script>
-<script src="main.js"></script>
+  <!-- New CSV-driven loader (replaces any hard-coded data) -->
+  <script src="./main.js"></script>
+</body>
+</html>
