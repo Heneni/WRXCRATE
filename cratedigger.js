@@ -1,4 +1,6 @@
-// Simplified cratedigger.js for GitHub deployment
+// cratedigger.js – Fixed version for GitHub Pages
+// Ensures album cover textures fill the record face completely.
+
 class Cratedigger {
     constructor() {
         this.scene = null;
@@ -9,7 +11,7 @@ class Cratedigger {
         this.loadedRecords = 0;
         this.infoPanelState = 'closed';
         this.doRender = true;
-        
+
         this.config = {
             debug: false,
             nbCrates: 3,
@@ -26,19 +28,17 @@ class Cratedigger {
             onInfoPanelClosed: () => {},
             onLoadingEnd: () => {}
         };
-        
+
         this.mouse = { x: 0, y: 0 };
         this.canvasWidth = 0;
         this.canvasHeight = 0;
     }
 
     init(params) {
-        if (params) {
-            Object.assign(this.config, params);
-        }
-        
+        if (params) Object.assign(this.config, params);
+
         if (!this.config.elements.rootContainer) {
-            console.error('cratedigger.js - Init failed: can not find root container element.');
+            console.error("cratedigger.js - Init failed: missing root container element.");
             return;
         }
 
@@ -61,15 +61,23 @@ class Cratedigger {
         this.renderer.setSize(this.canvasWidth, this.canvasHeight);
         this.config.elements.canvasContainer.appendChild(this.renderer.domElement);
 
-        this.camera = new THREE.PerspectiveCamera(75, this.canvasWidth / this.canvasHeight, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(
+            75,
+            this.canvasWidth / this.canvasHeight,
+            0.1,
+            1000
+        );
         this.camera.position.set(0, 100, 300);
 
-        // Add lighting
-        const light = new THREE.PointLight(0xFFD6A5, this.config.lightIntensity);
+        // Lighting setup
+        const light = new THREE.PointLight(0xffd6a5, this.config.lightIntensity);
         light.position.set(300, 80, 0);
         this.scene.add(light);
+
         const ambient = new THREE.AmbientLight(0x404040, 0.5);
         this.scene.add(ambient);
+
+        // Ground plane
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
         const groundMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
         const ground = new THREE.Mesh(groundGeo, groundMat);
@@ -77,7 +85,7 @@ class Cratedigger {
         ground.position.y = -1;
         this.scene.add(ground);
 
-        // Create simple record display
+        // Create records
         this.initRecords();
     }
 
@@ -95,9 +103,7 @@ class Cratedigger {
 
     loadRecords(recordsData, shuffle, done) {
         this.showLoading(() => {
-            if (shuffle) {
-                recordsData = this.shuffle(recordsData);
-            }
+            if (shuffle) recordsData = this.shuffle(recordsData);
 
             for (let i = 0; i < this.records.length && i < recordsData.length; i++) {
                 this.records[i].data = recordsData[i];
@@ -123,12 +129,18 @@ class Cratedigger {
     }
 
     selectPrevRecord() {
-        const prevId = this.selectedRecord <= 0 ? this.loadedRecords - 1 : this.selectedRecord - 1;
+        const prevId =
+            this.selectedRecord <= 0
+                ? this.loadedRecords - 1
+                : this.selectedRecord - 1;
         this.selectRecord(prevId);
     }
 
     selectNextRecord() {
-        const nextId = this.selectedRecord >= this.loadedRecords - 1 ? 0 : this.selectedRecord + 1;
+        const nextId =
+            this.selectedRecord >= this.loadedRecords - 1
+                ? 0
+                : this.selectedRecord + 1;
         this.selectRecord(nextId);
     }
 
@@ -146,16 +158,16 @@ class Cratedigger {
 
     flipSelectedRecord() {
         if (this.records[this.selectedRecord]) {
-            this.infoPanelState = 'opened';
+            this.infoPanelState = "opened";
             this.fadeIn(this.config.elements.infoContainer);
             this.config.onInfoPanelOpened();
         }
     }
 
     flipBackSelectedRecord() {
-        if (this.infoPanelState === 'opened') {
+        if (this.infoPanelState === "opened") {
             this.fadeOut(this.config.elements.infoContainer);
-            this.infoPanelState = 'closed';
+            this.infoPanelState = "closed";
             this.config.onInfoPanelClosed();
         }
     }
@@ -171,27 +183,27 @@ class Cratedigger {
     }
 
     fadeIn(element) {
-        element.style.display = 'block';
-        setTimeout(() => element.style.opacity = 1, 15);
+        element.style.display = "block";
+        setTimeout(() => (element.style.opacity = 1), 15);
     }
 
     fadeOut(element) {
         element.style.opacity = 0;
-        setTimeout(() => element.style.display = 'none', 300);
+        setTimeout(() => (element.style.display = "none"), 300);
     }
 
     bindEvents() {
-        this.config.elements.rootContainer.addEventListener('wheel', (e) => {
+        this.config.elements.rootContainer.addEventListener("wheel", (e) => {
             if (e.deltaY < 0) this.selectPrevRecord();
             else this.selectNextRecord();
             e.preventDefault();
         });
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') this.selectPrevRecord();
-            else if (e.key === 'ArrowRight') this.selectNextRecord();
-            else if (e.key === 'Enter' || e.key === ' ') this.flipSelectedRecord();
-            else if (e.key === 'Escape') this.flipBackSelectedRecord();
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") this.selectPrevRecord();
+            else if (e.key === "ArrowRight") this.selectNextRecord();
+            else if (e.key === "Enter" || e.key === " ") this.flipSelectedRecord();
+            else if (e.key === "Escape") this.flipBackSelectedRecord();
         });
     }
 
@@ -216,29 +228,45 @@ class Cratedigger {
     }
 
     createCrates() {
-        const crateCount = Math.ceil(this.loadedRecords / (this.config.recordsPerCrate * 2));
+        const crateCount = Math.ceil(
+            this.loadedRecords / (this.config.recordsPerCrate * 2)
+        );
         const crateWidth = 800;
         const crateDepth = 240;
         const crateHeight = 50;
         const wallThickness = 10;
-        const woodMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+        const woodMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
+
         for (let i = 0; i < crateCount; i++) {
-            const centerZ = (2 * i * 100) - 250;
+            const centerZ = 2 * i * 100 - 250;
+
             const bottomGeom = new THREE.BoxGeometry(crateWidth, wallThickness, crateDepth);
             const bottomMesh = new THREE.Mesh(bottomGeom, woodMaterial);
-            bottomMesh.position.set(0, -wallThickness/2, centerZ);
+            bottomMesh.position.set(0, -wallThickness / 2, centerZ);
+
             const sideGeom = new THREE.BoxGeometry(wallThickness, crateHeight, crateDepth);
             const sideLeftMesh = new THREE.Mesh(sideGeom, woodMaterial);
-            sideLeftMesh.position.set(-crateWidth/2 - wallThickness/2, crateHeight/2, centerZ);
+            sideLeftMesh.position.set(
+                -crateWidth / 2 - wallThickness / 2,
+                crateHeight / 2,
+                centerZ
+            );
             const sideRightMesh = new THREE.Mesh(sideGeom, woodMaterial);
-            sideRightMesh.position.set(crateWidth/2 + wallThickness/2, crateHeight/2, centerZ);
-            const backGeom = new THREE.BoxGeometry(crateWidth + wallThickness*2, crateHeight, wallThickness);
+            sideRightMesh.position.set(
+                crateWidth / 2 + wallThickness / 2,
+                crateHeight / 2,
+                centerZ
+            );
+
+            const backGeom = new THREE.BoxGeometry(
+                crateWidth + wallThickness * 2,
+                crateHeight,
+                wallThickness
+            );
             const backMesh = new THREE.Mesh(backGeom, woodMaterial);
-            backMesh.position.set(0, crateHeight/2, centerZ - crateDepth/2 - wallThickness/2);
-            this.scene.add(bottomMesh);
-            this.scene.add(sideLeftMesh);
-            this.scene.add(sideRightMesh);
-            this.scene.add(backMesh);
+            backMesh.position.set(0, crateHeight / 2, centerZ - crateDepth / 2 - wallThickness / 2);
+
+            this.scene.add(bottomMesh, sideLeftMesh, sideRightMesh, backMesh);
         }
     }
 }
@@ -249,8 +277,8 @@ class Record {
         this.data = null;
         this.active = false;
         this.mesh = this.createMesh();
-        
-        // Position records in a grid
+
+        // Grid positioning
         const col = id % 8;
         const row = Math.floor(id / 8);
         this.mesh.position.x = (col - 3.5) * 100;
@@ -261,7 +289,11 @@ class Record {
 
     createMesh() {
         const geometry = new THREE.BoxGeometry(80, 80, 2);
-        const material = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x555555, shininess: 50 });
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x333333,
+            specular: 0x555555,
+            shininess: 50,
+        });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.visible = false;
         return mesh;
@@ -272,17 +304,45 @@ class Record {
         this.mesh.visible = true;
     }
 
+    // ✅ Fixed: image fills entire record face
     updateTexture(imageUrl) {
         if (!imageUrl) return;
-        
+
         const loader = new THREE.TextureLoader();
-        loader.setCrossOrigin('Anonymous');
-        loader.load(imageUrl, (texture) => {
-            this.mesh.material.map = texture;
-            this.mesh.material.needsUpdate = true;
-        }, undefined, (error) => {
-            console.log('Texture load error:', error);
-        });
+        loader.setCrossOrigin("Anonymous");
+        loader.load(
+            imageUrl,
+            (texture) => {
+                const img = texture.image;
+                const w = img.width;
+                const h = img.height;
+                const aspect = w / h;
+
+                // Reset defaults
+                texture.repeat.set(1, 1);
+                texture.offset.set(0, 0);
+
+                if (aspect > 1) {
+                    // Landscape: crop left/right
+                    const visibleWidth = h / w;
+                    texture.repeat.x = visibleWidth;
+                    texture.offset.x = (1 - visibleWidth) / 2;
+                } else if (aspect < 1) {
+                    // Portrait: crop top/bottom
+                    const visibleHeight = w / h;
+                    texture.repeat.y = visibleHeight;
+                    texture.offset.y = (1 - visibleHeight) / 2;
+                }
+
+                texture.needsUpdate = true;
+                this.mesh.material.map = texture;
+                this.mesh.material.needsUpdate = true;
+            },
+            undefined,
+            (error) => console.error("Texture load error:", error)
+        );
     }
 }
+
 window.Cratedigger = Cratedigger;
+     
