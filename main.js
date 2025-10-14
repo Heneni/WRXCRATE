@@ -1,4 +1,4 @@
-// /main.js  — loads records from /data/records.csv (no hardcoded JSON)
+// /main.js — complete file; loads records from /data/records.csv (no hardcoded JSON)
 (function () {
   const CSV_URL = './data/records.csv';
 
@@ -27,6 +27,7 @@
     const headers = rows[0].map(h => h.trim().toLowerCase());
     const out = [];
     for (let r = 1; r < rows.length; r++) {
+      if (rows[r].every(v => (v || '').trim() === '')) continue; // skip blank lines
       const rec = {};
       for (let c = 0; c < headers.length; c++) rec[headers[c]] = (rows[r][c] || '').trim();
       out.push({
@@ -41,6 +42,7 @@
     return out;
   }
 
+  // Grab UI elements the runtime expects
   const el = (id) => document.getElementById(id);
   const root = el('cratedigger'), canvas = el('cratedigger-canvas'), loading = el('cratedigger-loading'), info = el('cratedigger-info');
   const btnPrev = el('button-prev'), btnShow = el('button-show'), btnNext = el('button-next');
@@ -64,6 +66,12 @@
   }
 
   async function boot() {
+    if (!window.cratedigger) {
+      console.error('cratedigger runtime not found. Ensure cratedigger.js is included before main.js.');
+      return;
+    }
+
+    // Initialize 3D viewer
     window.cratedigger.init({
       debug: true,
       elements: { rootContainer: root, canvasContainer: canvas, loadingContainer: loading, infoContainer: info },
@@ -71,6 +79,7 @@
       onInfoPanelClosed: () => {}
     });
 
+    // Load CSV and feed records to the viewer
     let records = [];
     try {
       const res = await fetch(CSV_URL, { cache: 'no-store' });
