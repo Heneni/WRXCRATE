@@ -105,6 +105,14 @@ export default class Record {
           this.baseMaterial,     // bottom
           coverFrontMaterial,    // front
           coverBackMaterial,     // back
+        // Use the album cover on both front and back faces of the record
+        const sleeveMaterials = [
+          this.baseMaterial,  // right
+          this.baseMaterial,  // left
+          this.baseMaterial,  // top
+          this.baseMaterial,  // bottom
+          coverMaterial,      // front
+          coverMaterial       // back
         ];
 
         this.mesh.material = sleeveMaterials;
