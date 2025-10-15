@@ -12,15 +12,6 @@ const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer  = document.getElementById('cratedigger-record-cover');
 const loadingLabel    = document.querySelector('#cratedigger-loading .loading-label');
 
-let usingEmbeddedCsv = false;
-
-function getEmbeddedCsv() {
-  if (typeof window.__CRATEDIGGER_EMBEDDED_CSV__ === 'string' && window.__CRATEDIGGER_EMBEDDED_CSV__.length > 0) {
-    return window.__CRATEDIGGER_EMBEDDED_CSV__;
-  }
-  return null;
-}
-
 function parseCsv(text) {
   const lines = text.trim().split(/\r?\n/);
   const headers = lines.shift().split(',').map((header) => header.trim());
@@ -45,12 +36,7 @@ async function loadCsvRecords() {
     const text = await response.text();
     return parseCsv(text);
   } catch (networkError) {
-    const embeddedCsv = getEmbeddedCsv();
-    if (embeddedCsv) {
-      usingEmbeddedCsv = true;
-      console.warn('Falling back to the embedded CSV snapshot because the network request failed.', networkError);
-      return parseCsv(embeddedCsv);
-    }
+    console.error('Failed to load CSV records:', networkError);
     throw networkError;
   }
 }
@@ -94,14 +80,9 @@ function loadRecordsIntoViewer(records) {
 window.addEventListener('DOMContentLoaded', () => {
   loadCsvRecords()
     .then((records) => {
-      if (usingEmbeddedCsv) {
-        updateLoadingMessage('Loaded bundled records — no server needed.');
-        console.info('Loaded the bundled CSV snapshot; the viewer works without running npm start.');
-      }
       loadRecordsIntoViewer(records);
     })
     .catch((error) => {
-      console.error('Failed to load CSV records:', error);
       updateLoadingMessage('Could not load records. Please reload or check the console for details.');
     });
 });

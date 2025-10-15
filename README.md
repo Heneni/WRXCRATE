@@ -1,10 +1,18 @@
 # WRX Crate viewer
 
-This repository contains the static Three.js viewer for the WRX record crate. The viewer ships with an embedded snapshot of the CSV data, so you can simply open `index.html` in any modern browser and it will work without running a local server or installing dependencies.
+This repository contains the static Three.js viewer for the WRX record crate. The page loads `data/records.csv` at runtime, so it must be served over HTTP(S) from the same directory (for example via your existing static hosting or CDN).
+
+## What you need to do
+
+1. Merge this branch into the branch that your static host publishes (usually `main`).
+2. Push the updated branch so your host/CDN redeploys the static files.
+3. Once the deploy finishes, open the hosted URL. The viewer will fetch `data/records.csv` and display the covers on both faces.
+
+No extra local steps are required unless you want to test the viewer on your machine.
 
 ## Optional: refresh the data locally
 
-Opening the page directly uses the bundled CSV snapshot. If you want to load a freshly exported `data/records.csv` instead, you can serve the folder locally:
+If you need to verify changes before pushing live, you can serve the folder locally:
 
 1. Make sure you have a recent version of Node.js installed (v18 or newer works).
 2. From the project directory, start the bundled static web server:
@@ -27,7 +35,7 @@ Then browse to `http://localhost:3000` instead.
 ## Troubleshooting
 
 * **Images still not showing?** The CSV points at cover art hosted on third-party CDNs. Some of those hosts (for example Google Cloud Storage) refuse hotlinked requests, so the browser console will log `403 Forbidden` responses for specific records. The viewer keeps working, but those individual sleeves remain blank because the remote server denied the download.
-* **CSV failed to load?** When opened directly from the filesystem the app now falls back to the bundled snapshot. If you prefer to fetch `data/records.csv` live and see an error, confirm that you started the local server described above.
+* **CSV failed to load?** Make sure you are serving the site over HTTP(S); browsers block `fetch()` calls when the page is opened directly from the filesystem.
 
 ## Tests
 
