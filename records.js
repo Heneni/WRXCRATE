@@ -14,10 +14,10 @@ export default class Record {
 
     // Create record mesh
     const geometry = new THREE.BoxGeometry(100, 1.5, 100, 1, 1, 1);
-    const baseMaterial = new THREE.MeshLambertMaterial({
+    this.baseMaterial = new THREE.MeshLambertMaterial({
       color: Constants.sleeveColor,
     });
-    this.mesh = new THREE.Mesh(geometry, baseMaterial);
+    this.mesh = new THREE.Mesh(geometry, this.baseMaterial);
     this.mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(50, 0, 0));
     this.mesh.position.set(this.recordXPos, Constants.scene.recordBaseY, 0);
     this.mesh.rotation.z = Math.PI / 2;
@@ -81,14 +81,14 @@ export default class Record {
           map: texture,
         });
 
-        // Replace only the front face of the box with the cover image
+        // Use the album cover on both front and back faces of the record
         const sleeveMaterials = [
-          baseMaterial,  // right
-          baseMaterial,  // left
-          baseMaterial,  // top
-          baseMaterial,  // bottom
-          coverMaterial, // front
-          baseMaterial   // back
+          this.baseMaterial,  // right
+          this.baseMaterial,  // left
+          this.baseMaterial,  // top
+          this.baseMaterial,  // bottom
+          coverMaterial,      // front
+          coverMaterial       // back
         ];
 
         this.mesh.material = sleeveMaterials;
