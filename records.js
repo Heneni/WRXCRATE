@@ -48,52 +48,36 @@ export default class Record {
 
   applyCoverTexture(imageUrl) {
     const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('Anonymous');
+    loader.setCrossOrigin('anonymous');
     loader.load(
       imageUrl,
       (texture) => {
-        // Compute aspect ratio for cropping
-        const img = texture.image;
-        const w = img.width;
-        const h = img.height;
-        const aspect = w / h;
+        const { width, height } = texture.image;
+        const aspect = width / height;
 
-        // Default repeat/offset (no crop)
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+
         texture.repeat.set(1, 1);
         texture.offset.set(0, 0);
 
         if (aspect > 1) {
-          // Landscape: crop left/right
-          const visibleWidth = h / w;
+          const visibleWidth = height / width;
           texture.repeat.x = visibleWidth;
           texture.offset.x = (1 - visibleWidth) / 2;
         } else if (aspect < 1) {
-          // Portrait: crop top/bottom
-          const visibleHeight = w / h;
+          const visibleHeight = width / height;
           texture.repeat.y = visibleHeight;
           texture.offset.y = (1 - visibleHeight) / 2;
         }
 
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.needsUpdate = true;
 
-        // Clone and mirror the texture for the back face so the artwork reads
-        // correctly after the sleeve is flipped around.
-        const backTexture = texture.clone();
-        backTexture.repeat.x = -texture.repeat.x;
-        backTexture.offset.x = texture.offset.x + texture.repeat.x;
-        backTexture.repeat.y = texture.repeat.y;
-        backTexture.offset.y = texture.offset.y;
-        // Clone and rotate the texture for the back face so the artwork fills the
-        // sleeve without relying on negative UV repeats (which clash with
-        // ClampToEdge wrapping and caused blank backs for some images).
         const backTexture = texture.clone();
         backTexture.center.set(0.5, 0.5);
         backTexture.rotation = Math.PI;
         backTexture.needsUpdate = true;
 
-        // Create cover materials for the front and back of the sleeve.
         const coverFrontMaterial = new THREE.MeshLambertMaterial({
           map: texture,
           side: THREE.DoubleSide,
@@ -103,35 +87,14 @@ export default class Record {
           side: THREE.DoubleSide,
         });
 
-        // Use the album cover on both front and back faces of the record while
-        // keeping the shared base sleeve material on the remaining faces.
-        const sleeveMaterials = [
-          this.baseMaterial,     // right
-          this.baseMaterial,     // left
-          this.baseMaterial,     // top
-          this.baseMaterial,     // bottom
-          coverFrontMaterial,    // front
-          coverBackMaterial,     // back
-        const sleeveMaterials = [
-          this.baseMaterial,     // right
-          this.baseMaterial,     // left
-          this.baseMaterial,     // top
-          this.baseMaterial,     // bottom
-          coverFrontMaterial,    // front
-          coverBackMaterial,     // back
-        // Use the album cover on both front and back faces of the record
-        const sleeveMaterials = [
-          this.baseMaterial,  // right
-          this.baseMaterial,  // left
-          this.baseMaterial,  // top
-          this.baseMaterial,  // bottom
-          coverMaterial,      // front
-          coverMaterial       // back
+        this.mesh.material = [
+          this.baseMaterial,
+          this.baseMaterial,
+          this.baseMaterial,
+          this.baseMaterial,
+          coverFrontMaterial,
+          coverBackMaterial,
         ];
-
-        this.mesh.material = sleeveMaterials;
-        coverFrontMaterial.needsUpdate = true;
-        coverBackMaterial.needsUpdate = true;
       },
       undefined,
       (err) => console.error('Texture load error:', err)
