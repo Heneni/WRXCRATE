@@ -1,22 +1,6 @@
-/* index.js — legacy controller for CrateDigger (not used by index.html) */
+/* index.js — lightweight controller for CrateDigger */
 
-const data = [
-  {
-    title: "Let it Hiss",
-    artist: "The Barr Brothers",
-    cover: "https://i.scdn.co/image/ab67616d0000b27392d68ffd58ad8ea4cf9be566",
-    year: "acid jazz-jazz funk",
-    hasSleeve: true,
-  },
-  // ... repeat the other records here exactly as in main.js ...
-  {
-    title: "Taffetas",
-    artist: "Taffetas",
-    cover: "https://i.scdn.co/image/ab67616d0000b273923a878d3e0de9fb10993791",
-    year: "acid jazz-jazz funk",
-    hasSleeve: true,
-  },
-];
+const csvUrl = 'data/records.csv';
 
 // DOM references (same as main.js)
 const bottomBar       = document.getElementById('bottom-bar');
@@ -26,6 +10,66 @@ const buttonNext      = document.getElementById('button-next');
 const titleContainer  = document.getElementById('cratedigger-record-title');
 const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer  = document.getElementById('cratedigger-record-cover');
+
+function parseCsv(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines.shift().split(',').map((header) => header.trim());
+  return lines
+    .filter(Boolean)
+    .map((line) => {
+      const values = line.split(',');
+      const entry = {};
+      headers.forEach((header, index) => {
+        entry[header] = values[index] ? values[index].trim() : '';
+      });
+      return entry;
+    });
+}
+
+async function loadCsvRecords() {
+  const response = await fetch(csvUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch CSV (${response.status})`);
+  }
+  const text = await response.text();
+  return parseCsv(text);
+}
+
+function normaliseRecord(record, index) {
+  const rawTitle = record.title?.trim();
+  const rawArtist = record.artist?.trim();
+  const title = rawTitle || rawArtist || `Record ${index + 1}`;
+  const artist = rawArtist || rawTitle || 'Unknown Artist';
+  const cover = (record.cover || '').replace('http://', 'https://');
+  const hasSleeve = typeof record.hasSleeve === 'string'
+    ? record.hasSleeve.toLowerCase() === 'true'
+    : Boolean(record.hasSleeve);
+
+  return {
+    title,
+    artist,
+    cover,
+    year: record.year?.trim() || '',
+    hasSleeve,
+  };
+}
+
+function loadRecordsIntoViewer(records) {
+  const preparedRecords = records.map(normaliseRecord);
+  window.cratedigger.loadRecords(preparedRecords, true, () => {
+    bindEvents();
+    const selected = window.cratedigger.getSelectedRecord();
+    if (selected) {
+      fillInfoPanel(selected);
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadCsvRecords()
+    .then(loadRecordsIntoViewer)
+    .catch((error) => console.error('Failed to load CSV records:', error));
+});
 
 // Attach events
 function bindEvents() {
@@ -72,8 +116,4 @@ window.cratedigger.init({
   onInfoPanelClosed() {
     bottomBar.classList.remove('closed');
   },
-});
-
-window.cratedigger.loadRecords(data, true, () => {
-  bindEvents();
 });

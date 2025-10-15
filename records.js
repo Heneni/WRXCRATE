@@ -88,16 +88,20 @@ export default class Record {
         });
 
         this.mesh.material = [
-          this.baseMaterial,
-          this.baseMaterial,
-          this.baseMaterial,
-          this.baseMaterial,
-          coverFrontMaterial,
-          coverBackMaterial,
+          this.baseMaterial,      // right edge
+          this.baseMaterial,      // left edge
+          coverBackMaterial,      // top (faces viewer after flip)
+          coverFrontMaterial,     // bottom (faces viewer by default)
+          this.baseMaterial,      // front edge
+          this.baseMaterial,      // back edge
         ];
       },
       undefined,
-      (err) => console.error('Texture load error:', err)
+      (err) => {
+        console.error('Texture load error:', err);
+        console.error('CrateDigger: cover image failed to load', imageUrl);
+        console.error('The host blocked the request (most of the CSV URLs require hotlinking permissions).');
+      }
     );
   }
 
