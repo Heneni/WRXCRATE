@@ -74,13 +74,37 @@ export default class Record {
           texture.offset.y = (1 - visibleHeight) / 2;
         }
 
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.needsUpdate = true;
 
-        // Create a material using the cropped texture for the front face
-        const coverMaterial = new THREE.MeshLambertMaterial({
+        // Clone and rotate the texture for the back face so the artwork fills the
+        // sleeve without relying on negative UV repeats (which clash with
+        // ClampToEdge wrapping and caused blank backs for some images).
+        const backTexture = texture.clone();
+        backTexture.center.set(0.5, 0.5);
+        backTexture.rotation = Math.PI;
+        backTexture.needsUpdate = true;
+
+        // Create cover materials for the front and back of the sleeve.
+        const coverFrontMaterial = new THREE.MeshLambertMaterial({
           map: texture,
+          side: THREE.DoubleSide,
+        });
+        const coverBackMaterial = new THREE.MeshLambertMaterial({
+          map: backTexture,
+          side: THREE.DoubleSide,
         });
 
+        // Use the album cover on both front and back faces of the record while
+        // keeping the shared base sleeve material on the remaining faces.
+        const sleeveMaterials = [
+          this.baseMaterial,     // right
+          this.baseMaterial,     // left
+          this.baseMaterial,     // top
+          this.baseMaterial,     // bottom
+          coverFrontMaterial,    // front
+          coverBackMaterial,     // back
         // Use the album cover on both front and back faces of the record
         const sleeveMaterials = [
           this.baseMaterial,  // right
@@ -92,7 +116,8 @@ export default class Record {
         ];
 
         this.mesh.material = sleeveMaterials;
-        this.mesh.material.needsUpdate = true;
+        coverFrontMaterial.needsUpdate = true;
+        coverBackMaterial.needsUpdate = true;
       },
       undefined,
       (err) => console.error('Texture load error:', err)

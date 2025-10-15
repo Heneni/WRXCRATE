@@ -1,0 +1,10 @@
+{
+  "name": "wrxcrate",
+  "version": "1.0.0",
+  "description": "WRX Crate record viewer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/run-tests.js"
+  }
+}
