@@ -12,7 +12,14 @@ const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer  = document.getElementById('cratedigger-record-cover');
 const loadingLabel    = document.querySelector('#cratedigger-loading .loading-label');
 
-const localServerInstructions = 'Run "npm start" from the project folder and open http://localhost:8080 in your browser.';
+let usingEmbeddedCsv = false;
+
+function getEmbeddedCsv() {
+  if (typeof window.__CRATEDIGGER_EMBEDDED_CSV__ === 'string' && window.__CRATEDIGGER_EMBEDDED_CSV__.length > 0) {
+    return window.__CRATEDIGGER_EMBEDDED_CSV__;
+  }
+  return null;
+}
 
 function parseCsv(text) {
   const lines = text.trim().split(/\r?\n/);
@@ -30,12 +37,22 @@ function parseCsv(text) {
 }
 
 async function loadCsvRecords() {
-  const response = await fetch(csvUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch CSV (${response.status})`);
+  try {
+    const response = await fetch(csvUrl, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch CSV (${response.status})`);
+    }
+    const text = await response.text();
+    return parseCsv(text);
+  } catch (networkError) {
+    const embeddedCsv = getEmbeddedCsv();
+    if (embeddedCsv) {
+      usingEmbeddedCsv = true;
+      console.warn('Falling back to the embedded CSV snapshot because the network request failed.', networkError);
+      return parseCsv(embeddedCsv);
+    }
+    throw networkError;
   }
-  const text = await response.text();
-  return parseCsv(text);
 }
 
 function updateLoadingMessage(message) {
@@ -75,20 +92,17 @@ function loadRecordsIntoViewer(records) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  if (window.location.protocol === 'file:') {
-    console.warn('CrateDigger needs to be served over HTTP so the browser can fetch data/records.csv.');
-    console.warn(localServerInstructions);
-    updateLoadingMessage(`Waiting for a local server… ${localServerInstructions}`);
-  }
-
   loadCsvRecords()
-    .then(loadRecordsIntoViewer)
+    .then((records) => {
+      if (usingEmbeddedCsv) {
+        updateLoadingMessage('Loaded bundled records — no server needed.');
+        console.info('Loaded the bundled CSV snapshot; the viewer works without running npm start.');
+      }
+      loadRecordsIntoViewer(records);
+    })
     .catch((error) => {
       console.error('Failed to load CSV records:', error);
-      if (window.location.protocol === 'file:') {
-        console.error('The browser blocked the CSV request because index.html was opened directly from the file system.');
-      }
-      updateLoadingMessage(`Could not load records. ${localServerInstructions}`);
+      updateLoadingMessage('Could not load records. Please reload or check the console for details.');
     });
 });
 
