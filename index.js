@@ -10,6 +10,9 @@ const buttonNext      = document.getElementById('button-next');
 const titleContainer  = document.getElementById('cratedigger-record-title');
 const artistContainer = document.getElementById('cratedigger-record-artist');
 const coverContainer  = document.getElementById('cratedigger-record-cover');
+const loadingLabel    = document.querySelector('#cratedigger-loading .loading-label');
+
+const localServerInstructions = 'Run "npm start" from the project folder and open http://localhost:8080 in your browser.';
 
 function parseCsv(text) {
   const lines = text.trim().split(/\r?\n/);
@@ -33,6 +36,12 @@ async function loadCsvRecords() {
   }
   const text = await response.text();
   return parseCsv(text);
+}
+
+function updateLoadingMessage(message) {
+  if (loadingLabel) {
+    loadingLabel.textContent = message;
+  }
 }
 
 function normaliseRecord(record, index) {
@@ -66,9 +75,21 @@ function loadRecordsIntoViewer(records) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  if (window.location.protocol === 'file:') {
+    console.warn('CrateDigger needs to be served over HTTP so the browser can fetch data/records.csv.');
+    console.warn(localServerInstructions);
+    updateLoadingMessage(`Waiting for a local server… ${localServerInstructions}`);
+  }
+
   loadCsvRecords()
     .then(loadRecordsIntoViewer)
-    .catch((error) => console.error('Failed to load CSV records:', error));
+    .catch((error) => {
+      console.error('Failed to load CSV records:', error);
+      if (window.location.protocol === 'file:') {
+        console.error('The browser blocked the CSV request because index.html was opened directly from the file system.');
+      }
+      updateLoadingMessage(`Could not load records. ${localServerInstructions}`);
+    });
 });
 
 // Attach events
