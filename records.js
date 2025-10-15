@@ -78,6 +78,13 @@ export default class Record {
         texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.needsUpdate = true;
 
+        // Clone and mirror the texture for the back face so the artwork reads
+        // correctly after the sleeve is flipped around.
+        const backTexture = texture.clone();
+        backTexture.repeat.x = -texture.repeat.x;
+        backTexture.offset.x = texture.offset.x + texture.repeat.x;
+        backTexture.repeat.y = texture.repeat.y;
+        backTexture.offset.y = texture.offset.y;
         // Clone and rotate the texture for the back face so the artwork fills the
         // sleeve without relying on negative UV repeats (which clash with
         // ClampToEdge wrapping and caused blank backs for some images).
@@ -98,6 +105,13 @@ export default class Record {
 
         // Use the album cover on both front and back faces of the record while
         // keeping the shared base sleeve material on the remaining faces.
+        const sleeveMaterials = [
+          this.baseMaterial,     // right
+          this.baseMaterial,     // left
+          this.baseMaterial,     // top
+          this.baseMaterial,     // bottom
+          coverFrontMaterial,    // front
+          coverBackMaterial,     // back
         const sleeveMaterials = [
           this.baseMaterial,     // right
           this.baseMaterial,     // left
