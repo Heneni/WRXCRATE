@@ -85,6 +85,12 @@ export default class Record {
         backTexture.offset.x = texture.offset.x + texture.repeat.x;
         backTexture.repeat.y = texture.repeat.y;
         backTexture.offset.y = texture.offset.y;
+        // Clone and rotate the texture for the back face so the artwork fills the
+        // sleeve without relying on negative UV repeats (which clash with
+        // ClampToEdge wrapping and caused blank backs for some images).
+        const backTexture = texture.clone();
+        backTexture.center.set(0.5, 0.5);
+        backTexture.rotation = Math.PI;
         backTexture.needsUpdate = true;
 
         // Create cover materials for the front and back of the sleeve.
@@ -106,6 +112,21 @@ export default class Record {
           this.baseMaterial,     // bottom
           coverFrontMaterial,    // front
           coverBackMaterial,     // back
+        const sleeveMaterials = [
+          this.baseMaterial,     // right
+          this.baseMaterial,     // left
+          this.baseMaterial,     // top
+          this.baseMaterial,     // bottom
+          coverFrontMaterial,    // front
+          coverBackMaterial,     // back
+        // Use the album cover on both front and back faces of the record
+        const sleeveMaterials = [
+          this.baseMaterial,  // right
+          this.baseMaterial,  // left
+          this.baseMaterial,  // top
+          this.baseMaterial,  // bottom
+          coverMaterial,      // front
+          coverMaterial       // back
         ];
 
         this.mesh.material = sleeveMaterials;
