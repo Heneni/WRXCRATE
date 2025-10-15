@@ -10,6 +10,11 @@ This repository contains the static Three.js viewer for the WRX record crate. Th
 4. Wait for the deploy to finish, then open the hosted URL. The viewer will fetch `data/records.csv` from the same server and display the covers on both faces.
 
 > **You do not need to run anything locally unless you choose to test first.** Once the branch is merged and pushed, your existing hosting setup will pick up the new files automatically.
+1. Merge this branch into the branch that your static host publishes (usually `main`).
+2. Push the updated branch so your host/CDN redeploys the static files.
+3. Once the deploy finishes, open the hosted URL. The viewer will fetch `data/records.csv` and display the covers on both faces.
+
+No extra local steps are required unless you want to test the viewer on your machine.
 
 ## Optional: refresh the data locally
 
