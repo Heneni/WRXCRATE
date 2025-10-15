@@ -14,10 +14,10 @@ export default class Record {
 
     // Create record mesh
     const geometry = new THREE.BoxGeometry(100, 1.5, 100, 1, 1, 1);
-    const baseMaterial = new THREE.MeshLambertMaterial({
+    this.baseMaterial = new THREE.MeshLambertMaterial({
       color: Constants.sleeveColor,
     });
-    this.mesh = new THREE.Mesh(geometry, baseMaterial);
+    this.mesh = new THREE.Mesh(geometry, this.baseMaterial);
     this.mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(50, 0, 0));
     this.mesh.position.set(this.recordXPos, Constants.scene.recordBaseY, 0);
     this.mesh.rotation.z = Math.PI / 2;
@@ -74,25 +74,44 @@ export default class Record {
           texture.offset.y = (1 - visibleHeight) / 2;
         }
 
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.needsUpdate = true;
 
-        // Create a material using the cropped texture for the front face
-        const coverMaterial = new THREE.MeshLambertMaterial({
+        // Clone and mirror the texture for the back face so the artwork reads
+        // correctly after the sleeve is flipped around.
+        const backTexture = texture.clone();
+        backTexture.repeat.x = -texture.repeat.x;
+        backTexture.offset.x = texture.offset.x + texture.repeat.x;
+        backTexture.repeat.y = texture.repeat.y;
+        backTexture.offset.y = texture.offset.y;
+        backTexture.needsUpdate = true;
+
+        // Create cover materials for the front and back of the sleeve.
+        const coverFrontMaterial = new THREE.MeshLambertMaterial({
           map: texture,
+          side: THREE.DoubleSide,
+        });
+        const coverBackMaterial = new THREE.MeshLambertMaterial({
+          map: backTexture,
+          side: THREE.DoubleSide,
         });
 
-        // Replace only the front face of the box with the cover image
+        // Use the album cover on both front and back faces of the record while
+        // keeping the shared base sleeve material on the remaining faces.
         const sleeveMaterials = [
-          baseMaterial,  // right
-          baseMaterial,  // left
-          baseMaterial,  // top
-          baseMaterial,  // bottom
-          coverMaterial, // front
-          baseMaterial   // back
+          this.baseMaterial,     // right
+          this.baseMaterial,     // left
+          this.baseMaterial,     // top
+          this.baseMaterial,     // bottom
+          coverFrontMaterial,    // front
+          coverBackMaterial,     // back
         ];
 
         this.mesh.material = sleeveMaterials;
-        this.mesh.material.needsUpdate = true;
+        sleeveMaterials.forEach((material) => {
+          material.needsUpdate = true;
+        });
       },
       undefined,
       (err) => console.error('Texture load error:', err)
