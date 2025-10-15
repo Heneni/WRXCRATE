@@ -109,9 +109,8 @@ export default class Record {
         ];
 
         this.mesh.material = sleeveMaterials;
-        sleeveMaterials.forEach((material) => {
-          material.needsUpdate = true;
-        });
+        coverFrontMaterial.needsUpdate = true;
+        coverBackMaterial.needsUpdate = true;
       },
       undefined,
       (err) => console.error('Texture load error:', err)
