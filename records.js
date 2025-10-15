@@ -88,12 +88,12 @@ export default class Record {
         });
 
         this.mesh.material = [
-          this.baseMaterial,      // right edge
-          this.baseMaterial,      // left edge
-          coverBackMaterial,      // top (faces viewer after flip)
-          coverFrontMaterial,     // bottom (faces viewer by default)
-          this.baseMaterial,      // front edge
-          this.baseMaterial,      // back edge
+          this.baseMaterial,   // right edge
+          this.baseMaterial,   // left edge
+          this.baseMaterial,   // top
+          this.baseMaterial,   // bottom
+          coverFrontMaterial,  // front (faces viewer by default)
+          coverBackMaterial,   // back (faces viewer after flip)
         ];
       },
       undefined,

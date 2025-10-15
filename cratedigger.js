@@ -190,10 +190,10 @@ function getRecordMaterial(src, hasSleeve) {
   materials = [
     sleeveMaterial, // right edge
     sleeveMaterial, // left edge
-    new THREE.MeshLambertMaterial({ color: 0xffffff, map: backTexture }), // top (faces viewer after flip)
-    new THREE.MeshLambertMaterial({ color: 0xffffff, map: texture }), // bottom (faces viewer by default)
-    sleeveMaterial, // front edge
-    sleeveMaterial, // back edge
+    sleeveMaterial, // top
+    sleeveMaterial, // bottom
+    new THREE.MeshLambertMaterial({ color: 0xffffff, map: texture }), // front (faces viewer by default)
+    new THREE.MeshLambertMaterial({ color: 0xffffff, map: backTexture }), // back (faces viewer after flip)
   ];
 
   return materials;
