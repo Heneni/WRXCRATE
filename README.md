@@ -2,6 +2,28 @@
 
 This repository contains the static Three.js viewer for the WRX record crate. The page loads `data/records.csv` at runtime, so it must be served over HTTP(S) from the same directory (for example via your existing static hosting or CDN).
 
+## GitHub Pages Deployment
+
+This repository is configured to automatically deploy to GitHub Pages. When changes are merged to the `main` branch, the GitHub Actions workflow will automatically deploy the site to `https://heneni.github.io/WRXCRATE/`.
+
+### Setup GitHub Pages (One-time)
+
+To enable GitHub Pages for this repository:
+
+1. Navigate to **Settings > Pages** in the GitHub repository
+2. Under **Source**, select **GitHub Actions**
+3. The site will automatically deploy when changes are pushed to the `main` branch
+
+Once configured, the site will be accessible at: `https://heneni.github.io/WRXCRATE/`
+
+### Manual Deployment
+
+You can also manually trigger a deployment:
+
+1. Go to the **Actions** tab in GitHub
+2. Select the **Deploy to GitHub Pages** workflow
+3. Click **Run workflow** and select the `main` branch
+
 ## What you need to do
 
 1. Open a pull request with these changes (or fast-forward the branch if you prefer).
