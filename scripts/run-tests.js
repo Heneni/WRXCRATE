@@ -11,7 +11,7 @@ const colors = {
 const REQUIRED_FILES = [
   'index.html',
   'index.js',
-  'records.js'
+  'record.js'
 ];
 
 let failures = 0;
