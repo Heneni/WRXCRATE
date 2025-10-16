@@ -1,10 +1,10 @@
-import THREE from 'three.js';
-import TWEEN from 'tween.js';
-import Stats from 'stats-js';
-import dat from 'dat-gui';
-import Record from './record';
-import CameraManager from './cameraManager';
-import Constants from './constants';
+import * as THREE from "https://unpkg.com/three@0.155.0/build/three.module.js";
+import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js";
+import Stats from "https://unpkg.com/stats-js@1.0.1/build/stats.min.js";
+import * as dat from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
+import Record from './record.js';
+import CameraManager from './cameraManager.js';
+import Constants from './constants.js';
 
 // VARIABLES
 const exports = {};
@@ -37,15 +37,6 @@ let targetCameraPos = { x: 0, y: 0 };
 // Materials
 let woodMaterial;
 
-// Inject Three.js modules
-require('./threejs_modules/ShaderPass')(THREE);
-require('./threejs_modules/CopyShader')(THREE);
-require('./threejs_modules/RenderPass')(THREE);
-require('./threejs_modules/DoFShader')(THREE);
-require('./threejs_modules/FXAAShader')(THREE);
-require('./threejs_modules/MaskPass')(THREE);
-require('./threejs_modules/EffectComposer')(THREE);
-
 // -----------------------------------------------------------
 // CORE METHODS
 // -----------------------------------------------------------
@@ -54,7 +45,7 @@ function animate() {
   if (doRender) {
     requestAnimationFrame(animate);
     render();
-    if (Constants.debug) stats.update();
+    if (Constants.debug && stats) stats.update();
   }
 }
 
@@ -121,7 +112,7 @@ function loadRecords(recordsData, shuffleBeforeLoading, done) {
 // -----------------------------------------------------------
 
 function getRecordMaterial(src, hasSleeve) {
-  const img = new Image();
+  const img = new window.Image();
   const size = 400;
   const mapCanvas = document.createElement('canvas');
   const texture = new THREE.Texture(mapCanvas);
@@ -164,7 +155,7 @@ function getRecordMaterial(src, hasSleeve) {
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
 
     if (hasSleeve) {
-      sleeve = new Image();
+      sleeve = new window.Image();
       sleeve.src = Constants.sleeveMaskTexture;
       sleeve.onload = function () {
         ctx.drawImage(sleeve, 0, 0, cw, ch);
@@ -268,8 +259,9 @@ function initScene() {
   CameraManager.init(canvasWidth / canvasHeight);
   camera = CameraManager.getCamera();
 
-  const woodTexture = THREE.ImageUtils.loadTexture(Constants.crateTexture);
-  woodTexture.anisotropy = renderer.getMaxAnisotropy();
+  const loader = new THREE.TextureLoader();
+  const woodTexture = loader.load(Constants.crateTexture);
+  woodTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
   woodMaterial = new THREE.MeshLambertMaterial({ map: woodTexture });
 
   rootContainer = new THREE.Object3D();
