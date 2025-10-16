@@ -125,18 +125,10 @@ function getRecordMaterial(src, hasSleeve) {
   const size = 400;
   const mapCanvas = document.createElement('canvas');
   const texture = new THREE.Texture(mapCanvas);
-  const backTexture = texture.clone();
-  backTexture.center.set(0.5, 0.5);
-  backTexture.rotation = Math.PI;
   let sleeve, sleeveMaterial, materials;
 
   img.crossOrigin = 'Anonymous';
   img.src = src || '';
-
-  img.onerror = function () {
-    console.error('CrateDigger: cover image failed to load', src);
-    console.error('The host blocked the request (most of the CSV URLs require hotlinking permissions).');
-  };
 
   mapCanvas.width = mapCanvas.height = size;
   texture.minFilter = THREE.LinearFilter;
@@ -177,31 +169,21 @@ function getRecordMaterial(src, hasSleeve) {
       sleeve.onload = function () {
         ctx.drawImage(sleeve, 0, 0, cw, ch);
         texture.needsUpdate = true;
-        backTexture.needsUpdate = true;
       };
     } else {
       texture.needsUpdate = true;
-      backTexture.needsUpdate = true;
     }
   };
 
   sleeveMaterial = new THREE.MeshLambertMaterial({ color: Constants.sleeveColor });
 
   materials = [
-    sleeveMaterial, // right edge
-    sleeveMaterial, // left edge
+    sleeveMaterial, // right
+    sleeveMaterial, // left
     sleeveMaterial, // top
+    new THREE.MeshLambertMaterial({ color: 0xffffff, map: texture }), // front
+    sleeveMaterial, // back
     sleeveMaterial, // bottom
-    new THREE.MeshLambertMaterial({
-      color: 0xffffff,
-      map: texture,
-      side: THREE.DoubleSide,
-    }), // front (faces viewer by default)
-    new THREE.MeshLambertMaterial({
-      color: 0xffffff,
-      map: backTexture,
-      side: THREE.DoubleSide,
-    }), // back (faces viewer after flip)
   ];
 
   return materials;
